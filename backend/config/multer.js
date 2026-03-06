@@ -5,19 +5,25 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
+
   filename: function (req, file, cb) {
     const uniqueName = Date.now() + path.extname(file.originalname);
     cb(null, uniqueName);
   },
 });
 
+// allow audio + image
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /mp3|wav|flac/;
+
+  const audioTypes = /mp3|wav|flac|webm/;
+  const imageTypes = /jpg|jpeg|png|webp/;
+
   const ext = path.extname(file.originalname).toLowerCase();
-  if (allowedTypes.test(ext)) {
+
+  if (audioTypes.test(ext) || imageTypes.test(ext)) {
     cb(null, true);
   } else {
-    cb("Only audio files allowed!");
+    cb(new Error("Only audio or image files allowed!"));
   }
 };
 

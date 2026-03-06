@@ -205,7 +205,7 @@ const Record = () => {
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1"><ImageIcon size={12}/> Thumbnail</label>
               <input
                 type="file"
@@ -213,7 +213,7 @@ const Record = () => {
                 onChange={(e) => setThumbnail(e.target.files[0])}
                 className="w-full bg-[#0A0A0A] border border-white/5 p-3 rounded-2xl text-[10px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-zinc-800 file:text-zinc-400 file:uppercase hover:file:bg-pink-500 hover:file:text-white transition-all cursor-pointer"
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="space-y-2">
