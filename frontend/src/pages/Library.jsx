@@ -1,12 +1,16 @@
 import { useSongs } from "../context/SongContext";
 import { useState } from "react";
 import API from "../api/axios";
-import { Trash2, Music2, Heart, Disc, Play, Pause, MoreVertical } from "lucide-react";
+import { Trash2, Music2, Disc, Play, Pause } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Library = () => {
   const { songs, fetchSongs } = useSongs();
-  const [playingId, setPlayingId] = useState(null); // Ethu play aaguthunu track panna
+  const [playingId, setPlayingId] = useState(null);
+
+  // 🔥 LOGIC FIX: Derive the Server Base URL from the environment variable
+  const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  const SERVER_BASE = API_URL.replace("/api", "");
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this memory? 🐝")) return;
@@ -24,9 +28,9 @@ const Library = () => {
       audio.pause();
       setPlayingId(null);
     } else {
-      // Vera ethachum play aagittu iruntha stop pannanum
       if (playingId) {
-        document.getElementById(`audio-${playingId}`).pause();
+        const currentAudio = document.getElementById(`audio-${playingId}`);
+        if (currentAudio) currentAudio.pause();
       }
       audio.play();
       setPlayingId(id);
@@ -67,7 +71,7 @@ const Library = () => {
                 className={`group flex items-center gap-4 p-3 rounded-2xl transition-all ${
                   playingId === song._id ? "bg-white/10" : "hover:bg-white/5"
                 }`}
-                onClick={() => togglePlay(song._id)} // Card click pannalae play aaganum
+                onClick={() => togglePlay(song._id)}
               >
                 {/* A. THUMBNAIL / PLAY ICON */}
                 <div className="relative shrink-0 w-14 h-14 bg-zinc-900 rounded-xl overflow-hidden border border-white/5">
@@ -78,7 +82,6 @@ const Library = () => {
                       <Music2 size={20} className="text-zinc-700" />
                     </div>
                   )}
-                  {/* Play Overlay */}
                   <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity ${playingId === song._id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                     {playingId === song._id ? (
                       <Pause className="text-pink-500 fill-pink-500" size={24} />
@@ -104,10 +107,10 @@ const Library = () => {
                   </div>
                 </div>
 
-                {/* C. HIDDEN AUDIO ELEMENT */}
+                {/* C. HIDDEN AUDIO ELEMENT 🔥 FIXED SRC */}
                 <audio 
                   id={`audio-${song._id}`} 
-                  src={song.fileUrl} 
+                  src={`${SERVER_BASE}${song.fileUrl}`} 
                   onEnded={() => setPlayingId(null)}
                   preload="metadata"
                 />
@@ -116,7 +119,7 @@ const Library = () => {
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={(e) => { 
-                      e.stopPropagation(); // Card click event-a thadukka
+                      e.stopPropagation(); 
                       handleDelete(song._id); 
                     }}
                     className="p-3 text-zinc-700 hover:text-red-500 transition-colors"
@@ -130,7 +133,7 @@ const Library = () => {
         )}
       </div>
 
-      {/* 3. MOBILE STICKY PLAYER (Optional - Only shows when playing) */}
+      {/* 3. MOBILE STICKY PLAYER */}
       <AnimatePresence>
         {playingId && (
           <motion.div 
@@ -140,18 +143,18 @@ const Library = () => {
             className="fixed bottom-24 left-4 right-4 bg-pink-600 h-16 rounded-2xl shadow-2xl flex items-center justify-between px-5 z-50 backdrop-blur-lg border border-white/20"
           >
             <div className="flex items-center gap-3 overflow-hidden">
-               <div className="w-10 h-10 bg-black/20 rounded-lg animate-spin-slow flex items-center justify-center">
-                  <Music2 size={16} />
-               </div>
-               <div className="truncate">
-                  <p className="text-xs font-black uppercase italic truncate leading-tight">
-                    {songs.find(s => s._id === playingId)?.title}
-                  </p>
-                  <p className="text-[10px] font-bold text-white/70 uppercase">Now Buzzing...</p>
-               </div>
+                <div className="w-10 h-10 bg-black/20 rounded-lg animate-spin-slow flex items-center justify-center">
+                   <Music2 size={16} />
+                </div>
+                <div className="truncate">
+                   <p className="text-xs font-black uppercase italic truncate leading-tight">
+                     {songs.find(s => s._id === playingId)?.title}
+                   </p>
+                   <p className="text-[10px] font-bold text-white/70 uppercase">Now Buzzing...</p>
+                </div>
             </div>
             <button onClick={() => togglePlay(playingId)} className="bg-white text-pink-600 p-2 rounded-full shadow-lg">
-               <Pause size={20} fill="currentColor" />
+                <Pause size={20} fill="currentColor" />
             </button>
           </motion.div>
         )}
