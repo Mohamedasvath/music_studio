@@ -8,6 +8,10 @@ const UploadSong = () => {
   const [songs, setSongs] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
+  // 🔥 LOGIC FIX: Get the server root URL by removing '/api' from the base URL
+  const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  const SERVER_BASE = API_URL.replace("/api", "");
+
   const formatDuration = (seconds) => {
     if (!seconds) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -34,7 +38,7 @@ const UploadSong = () => {
 
     const formData = new FormData();
     formData.append("song", file);
-    formData.append("title", file.name.replace(/\.[^/.]+$/, "")); // Filename mattum edukkum
+    formData.append("title", file.name.replace(/\.[^/.]+$/, ""));
     formData.append("category", "Honey Track");
     formData.append("artist", "Bee Studio");
     formData.append("type", "uploaded");
@@ -65,7 +69,6 @@ const UploadSong = () => {
 
   return (
     <div className="flex flex-col gap-10 max-w-4xl mx-auto p-4 pb-28">
-      
       {/* HEADER SECTION */}
       <div className="flex items-center gap-3">
         <div className="p-2 bg-pink-500/10 rounded-xl">
@@ -76,15 +79,12 @@ const UploadSong = () => {
         </h2>
       </div>
 
-      {/* UPLOAD BOX - CUSTOMIZED */}
+      {/* UPLOAD BOX */}
       <label className="cursor-pointer group">
         <motion.div
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
-          className="flex flex-col items-center justify-center
-                     border-2 border-dashed border-white/10
-                     rounded-[2.5rem] bg-[#0A0A0A] backdrop-blur-xl
-                     py-20 px-6 group-hover:border-pink-500/40 transition-all shadow-2xl"
+          className="flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-[2.5rem] bg-[#0A0A0A] backdrop-blur-xl py-20 px-6 group-hover:border-pink-500/40 transition-all shadow-2xl"
         >
           <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mb-6 border border-white/5 shadow-inner">
             <CloudUpload className={`${isUploading ? "animate-bounce" : ""} text-pink-500 w-10 h-10`} />
@@ -96,14 +96,7 @@ const UploadSong = () => {
             MP3, WAV, FLAC — Max 50MB
           </p>
         </motion.div>
-
-        <input
-          type="file"
-          accept="audio/*"
-          hidden
-          onChange={(e) => setFile(e.target.files[0])}
-          disabled={isUploading}
-        />
+        <input type="file" accept="audio/*" hidden onChange={(e) => setFile(e.target.files[0])} disabled={isUploading} />
       </label>
 
       {/* UPLOAD BUTTON */}
@@ -121,9 +114,7 @@ const UploadSong = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-2 px-2">
           <Music2 className="text-yellow-500" size={16} />
-          <h3 className="text-zinc-500 font-black text-[10px] uppercase tracking-[0.4em]">
-            Recent Drips
-          </h3>
+          <h3 className="text-zinc-500 font-black text-[10px] uppercase tracking-[0.4em]">Recent Drips</h3>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
@@ -131,6 +122,7 @@ const UploadSong = () => {
             {songs.map((song) => (
               <motion.div
                 key={song._id}
+                layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
@@ -142,9 +134,7 @@ const UploadSong = () => {
 
                 <div className="flex flex-col flex-1 min-w-0 w-full">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                    <p className="text-white font-bold truncate text-sm uppercase tracking-tight">
-                      {song.title}
-                    </p>
+                    <p className="text-white font-bold truncate text-sm uppercase tracking-tight">{song.title}</p>
                     <span className="text-[9px] font-black text-pink-500/60 uppercase tracking-widest bg-pink-500/5 px-2 py-0.5 rounded border border-pink-500/10 w-fit">
                       {song.category}
                     </span>
@@ -155,29 +145,20 @@ const UploadSong = () => {
                     <p className="text-yellow-500 text-[10px] font-black italic">{formatDuration(song.duration)}</p>
                   </div>
 
-                  {/* Audio Player Styling */}
+                  {/* 🔥 FIXED AUDIO SRC: Combine Server Base + fileUrl */}
                   <audio
                     controls
-                    src={song.fileUrl}
+                    src={`${SERVER_BASE}${song.fileUrl}`}
                     className="mt-4 w-full h-8 opacity-40 hover:opacity-100 transition-opacity invert"
                   />
                 </div>
 
-                <button
-                  onClick={() => handleDelete(song._id)}
-                  className="p-3 text-zinc-700 hover:text-red-500 hover:bg-red-500/5 rounded-2xl transition-all"
-                >
+                <button onClick={() => handleDelete(song._id)} className="p-3 text-zinc-700 hover:text-red-500 hover:bg-red-500/5 rounded-2xl transition-all">
                   <Trash2 size={20} />
                 </button>
               </motion.div>
             ))}
           </AnimatePresence>
-
-          {songs.length === 0 && (
-            <div className="text-center py-20 bg-zinc-950/20 rounded-[3rem] border border-dashed border-white/5">
-              <p className="text-zinc-700 italic text-sm font-medium">The vault is silent... 🐝</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

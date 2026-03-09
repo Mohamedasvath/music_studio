@@ -44,10 +44,10 @@ export const uploadSong = async (req, res) => {
     }
 
     // 🌐 file url
-    const fileUrl = `${process.env.BASE_URL}/uploads/${file.filename}`;
+   const fileUrl = `/uploads/${file.filename}`;
 
     // ⏱ duration
-    const duration = await getAudioDuration(file.path);
+    const duration = 0;
 
     // 🧠 sanitize category
     const category = allowedCategories.includes(req.body.category)
